@@ -43,8 +43,16 @@ All API endpoints are prefixed with \`/api/v1/\`
     },
     servers: [
       {
+        url: '/',
+        description: 'Current server (Live / Render)',
+      },
+      {
+        url: 'https://turago-backend-main.onrender.com',
+        description: 'Render Production server',
+      },
+      {
         url: 'http://localhost:3000',
-        description: 'Development server',
+        description: 'Local Development server',
       },
     ],
     components: {
