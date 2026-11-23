@@ -321,13 +321,23 @@ export class GoogleMapsProvider extends MapsProvider {
       });
       const data = await response.json();
       if (data && data.length > 0) {
-        return data.map((item) => ({
-          placeId: `osm_${item.place_id}`,
-          title: item.display_name.split(',')[0],
-          description: item.display_name,
-          latitude: parseFloat(item.lat),
-          longitude: parseFloat(item.lon),
-        }));
+        return data.map((item) => {
+          const parts = item.display_name.split(',');
+          const mainText = parts[0]?.trim() || item.display_name;
+          const secondaryText = parts.slice(1).join(',').trim();
+          return {
+            placeId: `osm_${item.place_id}`,
+            place_id: `osm_${item.place_id}`,
+            title: mainText,
+            description: item.display_name,
+            structured_formatting: {
+              main_text: mainText,
+              secondary_text: secondaryText,
+            },
+            latitude: parseFloat(item.lat),
+            longitude: parseFloat(item.lon),
+          };
+        });
       }
     } catch (err) {
       logger.debug({ error: err.message }, 'OSM autocomplete failed');
@@ -339,8 +349,13 @@ export class GoogleMapsProvider extends MapsProvider {
       (loc) => loc.title.toLowerCase().includes(q) || loc.description.toLowerCase().includes(q)
     ).map((loc) => ({
       placeId: loc.placeId,
+      place_id: loc.placeId,
       title: loc.title,
       description: loc.description,
+      structured_formatting: {
+        main_text: loc.title,
+        secondary_text: loc.description,
+      },
       latitude: loc.latitude,
       longitude: loc.longitude,
     }));
