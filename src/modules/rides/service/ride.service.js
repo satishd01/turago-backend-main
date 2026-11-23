@@ -35,6 +35,16 @@ import {
 import { getMapsProvider } from '../../../infrastructure/maps/index.js';
 import logger from '../../../config/logger.js';
 
+/**
+ * Helper to safely extract string ID whether the reference is populated or not.
+ * @param {any} entity
+ * @returns {string | null}
+ */
+function getEntityId(entity) {
+  if (!entity) return null;
+  return (entity._id ? entity._id : entity).toString();
+}
+
 const rideService = {
   /**
    * Creates a new ride request.
@@ -230,7 +240,7 @@ const rideService = {
       throw new NotFoundError('Ride');
     }
 
-    if (ride.driverId?.toString() !== driverId) {
+    if (getEntityId(ride.driverId) !== driverId) {
       throw new AuthorizationError('This ride is not assigned to you');
     }
 
@@ -259,7 +269,7 @@ const rideService = {
       throw new NotFoundError('Ride');
     }
 
-    if (ride.driverId?.toString() !== driverId) {
+    if (getEntityId(ride.driverId) !== driverId) {
       throw new AuthorizationError('This ride is not assigned to you');
     }
 
@@ -284,7 +294,7 @@ const rideService = {
       throw new NotFoundError('Ride');
     }
 
-    if (ride.driverId?.toString() !== driverId) {
+    if (getEntityId(ride.driverId) !== driverId) {
       throw new AuthorizationError('This ride is not assigned to you');
     }
 
@@ -318,7 +328,7 @@ const rideService = {
       throw new NotFoundError('Ride');
     }
 
-    if (ride.driverId?.toString() !== driverId) {
+    if (getEntityId(ride.driverId) !== driverId) {
       throw new AuthorizationError('This ride is not assigned to you');
     }
 
@@ -396,7 +406,7 @@ const rideService = {
 
     // Free up driver if one was assigned
     if (ride.driverId) {
-      await driverRepository.setAvailability(ride.driverId.toString(), DRIVER_AVAILABILITY.ONLINE).catch(() => {});
+      await driverRepository.setAvailability(getEntityId(ride.driverId), DRIVER_AVAILABILITY.ONLINE).catch(() => {});
     }
 
     await rideEventPublisher.publish({ type: RIDE_EVENTS.RIDE_CANCELLED, rideId });

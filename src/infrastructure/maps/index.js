@@ -4,6 +4,7 @@
 
 import env from '../../config/env.js';
 import { MockMapsProvider } from './MockMapsProvider.js';
+import { GoogleMapsProvider } from './GoogleMapsProvider.js';
 
 /** @type {import('./MapsProvider.js').MapsProvider | null} */
 let _instance = null;
@@ -24,12 +25,9 @@ export function getMapsProvider() {
       _instance = new MockMapsProvider();
       break;
 
-    // case 'google':
-    //   _instance = new GoogleMapsProvider(env.google.mapsApiKey);
-    //   break;
-    // case 'osrm':
-    //   _instance = new OsrmRoutingProvider(env.osrm.baseUrl);
-    //   break;
+    case 'google':
+      _instance = new GoogleMapsProvider(env.google.mapsApiKey);
+      break;
 
     default:
       throw new Error(`Unknown maps provider: "${provider}". Check MAP_PROVIDER in .env`);

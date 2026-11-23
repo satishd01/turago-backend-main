@@ -27,6 +27,7 @@ import userRoutes from '../modules/users/routes/user.routes.js';
 import driverRoutes from '../modules/drivers/routes/driver.routes.js';
 import rideRoutes from '../modules/rides/routes/ride.routes.js';
 import adminRoutes from '../modules/admin/routes/admin.routes.js';
+import locationRoutes from '../modules/locations/routes/location.routes.js';
 
 const app = express();
 
@@ -128,6 +129,7 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/drivers', driverRoutes);
 app.use('/api/v1/rides', rideRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/locations', locationRoutes);
 
 // ─── 404 handler ──────────────────────────────────────────────────────────────
 
