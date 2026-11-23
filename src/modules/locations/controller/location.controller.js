@@ -20,7 +20,8 @@ export const reverseGeocode = asyncHandler(async (req, res) => {
 });
 
 export const autocomplete = asyncHandler(async (req, res) => {
-  const { input, latitude, longitude } = req.query;
+  const input = req.query.input || req.query.query || req.query.search || req.query.q;
+  const { latitude, longitude } = req.query;
 
   const results = await locationService.autocomplete(input, {
     latitude: latitude ? parseFloat(latitude) : undefined,

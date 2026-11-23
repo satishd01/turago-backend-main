@@ -310,10 +310,14 @@ export class GoogleMapsProvider extends MapsProvider {
 
     // 2. Query OpenStreetMap live places search
     try {
-      const osmUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(input)}&format=json&countrycodes=in&limit=5`;
+      let osmUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(input)}&format=json&countrycodes=in&limit=10`;
+      if (biasCoords.lat && biasCoords.lng) {
+        const delta = 0.5; // ~50km bounding box around user's city
+        osmUrl += `&viewbox=${biasCoords.lng - delta},${biasCoords.lat + delta},${biasCoords.lng + delta},${biasCoords.lat - delta}`;
+      }
       const response = await fetch(osmUrl, {
         headers: { 'User-Agent': 'TuragoApp/1.0' },
-        signal: AbortSignal.timeout(4000),
+        signal: AbortSignal.timeout(5000),
       });
       const data = await response.json();
       if (data && data.length > 0) {

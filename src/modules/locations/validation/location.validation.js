@@ -17,11 +17,14 @@ export const reverseGeocodeQuerySchema = Joi.object({
 });
 
 export const autocompleteQuerySchema = Joi.object({
-  input: Joi.string().trim().min(1).required().messages({
-    'any.required': 'input query is required',
-  }),
+  input: Joi.string().trim().min(1).optional(),
+  query: Joi.string().trim().min(1).optional(),
+  search: Joi.string().trim().min(1).optional(),
+  q: Joi.string().trim().min(1).optional(),
   latitude: Joi.number().min(-90).max(90).optional(),
   longitude: Joi.number().min(-180).max(180).optional(),
+}).or('input', 'query', 'search', 'q').messages({
+  'object.missing': 'Search query parameter (input, query, search, or q) is required',
 });
 
 export const popularLocationsQuerySchema = Joi.object({
