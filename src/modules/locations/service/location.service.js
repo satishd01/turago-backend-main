@@ -85,7 +85,9 @@ const locationService = {
       { lat: destination.latitude, lng: destination.longitude }
     );
 
-    const vehicleTypes = vehicleType ? [vehicleType] : [VEHICLE_TYPE.BIKE, VEHICLE_TYPE.CAB];
+    const vehicleTypes = vehicleType
+      ? [vehicleType]
+      : [VEHICLE_TYPE.BIKE, VEHICLE_TYPE.AUTO, VEHICLE_TYPE.CAB];
     const fareEstimates = {};
 
     for (const vType of vehicleTypes) {
