@@ -1,0 +1,79 @@
+<%- include('partials/header') %>
+<%- include('partials/sidebar') %>
+
+<main class="flex-1 overflow-y-auto p-8">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h2 class="text-2xl font-bold text-white tracking-tight">Rides & Bookings</h2>
+      <p class="text-sm text-slate-400 mt-1">Live trip management and complete ride history.</p>
+    </div>
+  </div>
+
+  <!-- Rides Table -->
+  <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-sm">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-slate-300">
+        <thead class="bg-slate-900/60 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+          <tr>
+            <th class="py-3 px-6">Ride ID</th>
+            <th class="py-3 px-6">Customer</th>
+            <th class="py-3 px-6">Captain</th>
+            <th class="py-3 px-6">Vehicle</th>
+            <th class="py-3 px-6">Pickup Location</th>
+            <th class="py-3 px-6">Destination</th>
+            <th class="py-3 px-6">Final Fare</th>
+            <th class="py-3 px-6">Status</th>
+            <th class="py-3 px-6">Time</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-700">
+          <% if (rides && rides.length > 0) { %>
+            <% rides.forEach(function(ride) { %>
+              <tr class="hover:bg-slate-700/30 transition">
+                <td class="py-4 px-6 font-mono text-xs text-brand-400 font-bold">#<%= ride._id.toString().slice(-6) %></td>
+                <td class="py-4 px-6">
+                  <div class="font-medium text-white"><%= ride.customerId?.name || 'Customer' %></div>
+                  <div class="text-[11px] font-mono text-slate-400"><%= ride.customerId?.phone %></div>
+                </td>
+                <td class="py-4 px-6">
+                  <% if (ride.driverId) { %>
+                    <div class="font-medium text-white"><%= ride.driverId.name || 'Captain' %></div>
+                    <div class="text-[11px] font-mono text-slate-400"><%= ride.driverId.phone %></div>
+                  <% } else { %>
+                    <span class="text-slate-500 text-xs italic">Unassigned</span>
+                  <% } %>
+                </td>
+                <td class="py-4 px-6">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-slate-700 text-slate-200">
+                    <%= ride.vehicleType %>
+                  </span>
+                </td>
+                <td class="py-4 px-6 max-w-xs truncate" title="<%= ride.pickup.address %>"><%= ride.pickup.address %></td>
+                <td class="py-4 px-6 max-w-xs truncate" title="<%= ride.destination.address %>"><%= ride.destination.address %></td>
+                <td class="py-4 px-6 font-bold text-white">₹<%= ride.finalFare || ride.estimatedFare %></td>
+                <td class="py-4 px-6">
+                  <% if (ride.status === 'RIDE_COMPLETED') { %>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">COMPLETED</span>
+                  <% } else if (ride.status === 'CANCELLED') { %>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">CANCELLED</span>
+                  <% } else { %>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20"><%= ride.status %></span>
+                  <% } %>
+                </td>
+                <td class="py-4 px-6 text-xs text-slate-400 font-mono">
+                  <%= new Date(ride.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' }) %> <%= new Date(ride.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+                </td>
+              </tr>
+            <% }); %>
+          <% } else { %>
+            <tr>
+              <td colspan="9" class="py-8 text-center text-slate-500 text-sm">No rides found in database.</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

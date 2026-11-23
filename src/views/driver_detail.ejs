@@ -1,0 +1,161 @@
+<%- include('partials/header') %>
+<%- include('partials/sidebar') %>
+
+<main class="flex-1 overflow-y-auto p-8">
+  <div class="mb-6">
+    <a href="/admin/drivers" class="text-sm font-medium text-slate-400 hover:text-white flex items-center gap-2 mb-3">
+      <i class="fa-solid fa-arrow-left text-xs"></i>
+      <span>Back to Driver Approvals</span>
+    </a>
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-bold text-white tracking-tight">Review Captain: <%= driver.name || 'Applicant' %></h2>
+        <p class="text-sm text-slate-400 mt-0.5">Phone: <span class="font-mono text-slate-200"><%= driver.phone %></span> | ID: <span class="font-mono text-xs text-slate-400"><%= driver._id %></span></p>
+      </div>
+
+      <div>
+        <% if (driver.approvalStatus === 'APPROVED') { %>
+          <span class="px-4 py-1.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">STATUS: APPROVED</span>
+        <% } else if (driver.approvalStatus === 'REJECTED') { %>
+          <span class="px-4 py-1.5 rounded-full text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">STATUS: REJECTED</span>
+        <% } else { %>
+          <span class="px-4 py-1.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">STATUS: PENDING REVIEW</span>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Left Column: Details & Documents -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Vehicle Details Box -->
+      <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+        <h3 class="font-bold text-white mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-motorcycle text-brand-400"></i>
+          <span>Vehicle Information</span>
+        </h3>
+        <% if (vehicle) { %>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+            <div>
+              <p class="text-xs text-slate-400 uppercase tracking-wider">Type</p>
+              <p class="font-semibold text-white mt-1"><%= vehicle.type %></p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 uppercase tracking-wider">Registration Number</p>
+              <p class="font-mono font-bold text-emerald-400 mt-1 uppercase"><%= vehicle.registrationNumber %></p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 uppercase tracking-wider">Make / Brand</p>
+              <p class="font-medium text-white mt-1"><%= vehicle.make || 'Not specified' %></p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 uppercase tracking-wider">Model</p>
+              <p class="font-medium text-white mt-1"><%= vehicle.model || 'Not specified' %></p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 uppercase tracking-wider">Color</p>
+              <p class="font-medium text-white mt-1"><%= vehicle.color || 'Not specified' %></p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 uppercase tracking-wider">Year</p>
+              <p class="font-medium text-white mt-1"><%= vehicle.year || '2023' %></p>
+            </div>
+          </div>
+        <% } else { %>
+          <p class="text-sm text-slate-400">No vehicle registered yet.</p>
+        <% } %>
+      </div>
+
+      <!-- KYC & Uploaded Documents Review -->
+      <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+        <h3 class="font-bold text-white mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-file-invoice text-brand-400"></i>
+          <span>Uploaded KYC & Vehicle Documents</span>
+        </h3>
+
+        <% if (documents && documents.length > 0) { %>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <% documents.forEach(function(doc) { %>
+              <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-300">
+                      <%= doc.documentType.replace('_', ' ') %>
+                    </span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded <%= doc.status === 'APPROVED' ? 'bg-emerald-500/20 text-emerald-400' : (doc.status === 'REJECTED' ? 'bg-rose-500/20 text-rose-400' : 'bg-amber-500/20 text-amber-400') %>">
+                      <%= doc.status %>
+                    </span>
+                  </div>
+                  <% if (doc.documentNumber) { %>
+                    <p class="text-xs text-slate-400 mb-2 font-mono">No: <%= doc.documentNumber %></p>
+                  <% } %>
+                </div>
+
+                <div class="mt-4">
+                  <% if (doc.fileUrl) { %>
+                    <a href="<%= doc.fileUrl %>" target="_blank" class="block w-full text-center py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-lg border border-slate-600 transition">
+                      <i class="fa-solid fa-eye mr-1"></i> View Document
+                    </a>
+                  <% } else { %>
+                    <div class="p-4 bg-slate-800 rounded-lg text-center text-xs text-slate-500">
+                      Uploaded on file
+                    </div>
+                  <% } %>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% } else { %>
+          <div class="p-6 bg-slate-900/50 rounded-xl border border-dashed border-slate-700 text-center text-slate-400 text-sm">
+            <i class="fa-solid fa-folder-open text-2xl text-slate-600 mb-2"></i>
+            <p>Documents were uploaded during mobile registration flow.</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Right Column: Verification Action Card -->
+    <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 h-fit space-y-6">
+      <div>
+        <h3 class="font-bold text-white text-lg">Verification Action</h3>
+        <p class="text-xs text-slate-400 mt-1">Approving this captain will authorize them to go ONLINE and receive customer ride orders.</p>
+      </div>
+
+      <!-- Form: Approve or Reject -->
+      <form action="/admin/drivers/<%= driver._id %>/verify" method="POST" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Decision</label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="flex items-center justify-center gap-2 p-3 rounded-xl border border-slate-700 bg-slate-900 cursor-pointer has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-500/10 has-[:checked]:text-emerald-400 transition">
+              <input type="radio" name="status" value="APPROVED" checked class="hidden">
+              <i class="fa-solid fa-circle-check"></i>
+              <span class="text-xs font-bold uppercase">Approve</span>
+            </label>
+            <label class="flex items-center justify-center gap-2 p-3 rounded-xl border border-slate-700 bg-slate-900 cursor-pointer has-[:checked]:border-rose-500 has-[:checked]:bg-rose-500/10 has-[:checked]:text-rose-400 transition">
+              <input type="radio" name="status" value="REJECTED" class="hidden">
+              <i class="fa-solid fa-circle-xmark"></i>
+              <span class="text-xs font-bold uppercase">Reject</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Approval Note / Reason</label>
+          <textarea name="approvalNote" rows="3" placeholder="e.g. All KYC and vehicle documents verified by admin." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-brand-500 transition">All documents verified successfully by Admin.</textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Rejection Reason (If rejecting)</label>
+          <input type="text" name="rejectionReason" placeholder="e.g. Expired driving license or blurry image" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-rose-500 transition">
+        </div>
+
+        <button type="submit" class="w-full py-3.5 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-check-double"></i>
+          <span>Save Decision & Update Status</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

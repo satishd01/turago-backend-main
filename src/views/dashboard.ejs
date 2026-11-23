@@ -1,0 +1,137 @@
+<%- include('partials/header') %>
+<%- include('partials/sidebar') %>
+
+<main class="flex-1 overflow-y-auto p-8">
+  <!-- Top bar -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h2 class="text-2xl font-bold text-white tracking-tight">Operations Dashboard</h2>
+      <p class="text-sm text-slate-400 mt-1">Live overview of Turago fleet, rides, and pending captain verifications.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> System Live
+      </span>
+      <a href="/admin/dashboard" class="p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-white" title="Refresh">
+        <i class="fa-solid fa-arrows-rotate"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Key Stat Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Card 1: Pending Approvals -->
+    <a href="/admin/drivers?status=PENDING" class="bg-slate-800 rounded-2xl p-6 border border-slate-700 hover:border-amber-500/50 transition duration-200 block shadow-sm">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Pending Approvals</span>
+        <span class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-hourglass-half"></i>
+        </span>
+      </div>
+      <div class="text-3xl font-extrabold text-white"><%= stats.pendingDrivers %></div>
+      <p class="text-xs text-amber-400 font-medium mt-2 flex items-center gap-1">
+        <span>Requires document verification</span>
+        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+      </p>
+    </a>
+
+    <!-- Card 2: Active / Online Drivers -->
+    <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-sm">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Online Captains</span>
+        <span class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-motorcycle"></i>
+        </span>
+      </div>
+      <div class="text-3xl font-extrabold text-white"><%= stats.onlineDrivers %></div>
+      <p class="text-xs text-slate-400 mt-2">Ready to receive ride bookings</p>
+    </div>
+
+    <!-- Card 3: Total Approved Drivers -->
+    <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-sm">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Approved Fleet</span>
+        <span class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-shield-halved"></i>
+        </span>
+      </div>
+      <div class="text-3xl font-extrabold text-white"><%= stats.approvedDrivers %></div>
+      <p class="text-xs text-slate-400 mt-2">Total verified drivers in fleet</p>
+    </div>
+
+    <!-- Card 4: Total Rides -->
+    <a href="/admin/rides" class="bg-slate-800 rounded-2xl p-6 border border-slate-700 hover:border-emerald-500/50 transition duration-200 block shadow-sm">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Bookings</span>
+        <span class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-route"></i>
+        </span>
+      </div>
+      <div class="text-3xl font-extrabold text-white"><%= stats.totalRides %></div>
+      <p class="text-xs text-indigo-400 font-medium mt-2 flex items-center gap-1">
+        <span>View all trip records</span>
+        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+      </p>
+    </a>
+  </div>
+
+  <!-- Recent Bookings Table -->
+  <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-sm mb-8">
+    <div class="px-6 py-4 border-b border-slate-700 flex items-center justify-between">
+      <div>
+        <h3 class="font-bold text-white">Recent Ride Bookings</h3>
+        <p class="text-xs text-slate-400 mt-0.5">Real-time ride requests and status progression</p>
+      </div>
+      <a href="/admin/rides" class="text-xs font-semibold text-brand-400 hover:text-brand-300">View All Bookings &rarr;</a>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-slate-300">
+        <thead class="bg-slate-900/60 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+          <tr>
+            <th class="py-3 px-6">Ride ID</th>
+            <th class="py-3 px-6">Vehicle</th>
+            <th class="py-3 px-6">Pickup</th>
+            <th class="py-3 px-6">Destination</th>
+            <th class="py-3 px-6">Fare</th>
+            <th class="py-3 px-6">Status</th>
+            <th class="py-3 px-6">Created At</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-700">
+          <% if (recentRides && recentRides.length > 0) { %>
+            <% recentRides.forEach(function(ride) { %>
+              <tr class="hover:bg-slate-700/30 transition">
+                <td class="py-4 px-6 font-mono text-xs text-slate-300">#<%= ride._id.toString().slice(-6) %></td>
+                <td class="py-4 px-6">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-slate-700 text-slate-200">
+                    <%= ride.vehicleType %>
+                  </span>
+                </td>
+                <td class="py-4 px-6 max-w-xs truncate" title="<%= ride.pickup.address %>"><%= ride.pickup.address %></td>
+                <td class="py-4 px-6 max-w-xs truncate" title="<%= ride.destination.address %>"><%= ride.destination.address %></td>
+                <td class="py-4 px-6 font-bold text-white">₹<%= ride.finalFare || ride.estimatedFare %></td>
+                <td class="py-4 px-6">
+                  <% if (ride.status === 'RIDE_COMPLETED') { %>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">COMPLETED</span>
+                  <% } else if (ride.status === 'CANCELLED') { %>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">CANCELLED</span>
+                  <% } else { %>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20"><%= ride.status %></span>
+                  <% } %>
+                </td>
+                <td class="py-4 px-6 text-xs text-slate-400"><%= new Date(ride.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %></td>
+              </tr>
+            <% }); %>
+          <% } else { %>
+            <tr>
+              <td colspan="7" class="py-8 text-center text-slate-500 text-sm">No rides booked yet. Start a ride via API to see it here!</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer') %>
