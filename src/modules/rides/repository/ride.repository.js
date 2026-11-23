@@ -55,7 +55,10 @@ export class RideRepository {
       status: {
         $nin: [RIDE_STATUS.RIDE_COMPLETED, RIDE_STATUS.CANCELLED],
       },
-    });
+    })
+      .populate('driverId', 'name phone profileImage location vehicleType averageRating')
+      .populate('vehicleId', 'type registrationNumber make model color')
+      .select('-__v');
   }
 
   /**
@@ -74,7 +77,10 @@ export class RideRepository {
           RIDE_STATUS.RIDE_STARTED,
         ],
       },
-    });
+    })
+      .populate('customerId', 'name phone profileImage')
+      .populate('vehicleId', 'type registrationNumber make model color')
+      .select('-__v');
   }
 
   /**

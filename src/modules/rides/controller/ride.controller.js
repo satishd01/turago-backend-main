@@ -24,6 +24,15 @@ export const createRide = asyncHandler(async (req, res) => {
   });
 });
 
+/** GET /api/v1/rides/active */
+export const getActiveRide = asyncHandler(async (req, res) => {
+  const ride = await rideService.getActiveRide(req.user.userId, req.user.role);
+  return sendSuccess(res, {
+    message: ride ? 'Active ride found' : 'No active ride',
+    data: ride,
+  });
+});
+
 /** GET /api/v1/rides/:rideId */
 export const getRide = asyncHandler(async (req, res) => {
   const ride = await rideService.getRideById(req.params.rideId);

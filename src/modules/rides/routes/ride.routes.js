@@ -10,6 +10,7 @@
 import { Router } from 'express';
 import {
   createRide,
+  getActiveRide,
   getRide,
   getLiveRide,
   acceptRide,
@@ -70,6 +71,20 @@ router.post(
   validate({ body: createRideSchema }),
   createRide
 );
+
+/**
+ * @swagger
+ * /api/v1/rides/active:
+ *   get:
+ *     summary: Get current active ride for authenticated Customer or Driver
+ *     tags: [Rides]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Active ride details or null
+ */
+router.get('/active', getActiveRide);
 
 /**
  * @swagger

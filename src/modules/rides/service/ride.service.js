@@ -209,6 +209,19 @@ const rideService = {
   },
 
   /**
+   * Returns current active ride for either Customer or Driver.
+   * @param {string} userId
+   * @param {string} role
+   * @returns {Promise<import('mongoose').Document | null>}
+   */
+  async getActiveRide(userId, role) {
+    if (role === 'DRIVER') {
+      return rideRepository.findActiveByDriver(userId);
+    }
+    return rideRepository.findActiveByCustomer(userId);
+  },
+
+  /**
    * Returns the live state of a ride (for customer polling).
    * Includes driver's current location if assigned.
    * @param {string} rideId
