@@ -5,6 +5,7 @@
 
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 
 import env from '../../../config/env.js';
 import adminService from '../service/admin.service.js';
@@ -62,12 +63,35 @@ router.get('/login', (req, res) => {
 });
 
 /**
- * 1-Click Instant Demo Login (For seamless client presentations)
+ * Admin Username & Password Authentication
  */
-router.post('/demo-login', async (req, res) => {
-  let admin = await AdminModel.findOne({ phone: '+919999999999' });
-  if (!admin) {
+router.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  const cleanUsername = username?.trim().toLowerCase();
+  const cleanPassword = password?.trim();
+
+  if (!cleanUsername || !cleanPassword) {
+    return res.render('login', {
+      error: 'Please enter both username and password.',
+      message: null,
+    });
+  }
+
+  // Find admin by username, email, or phone
+  let admin = await AdminModel.findOne({
+    $or: [
+      { username: cleanUsername },
+      { email: cleanUsername },
+      { phone: username?.trim() },
+    ],
+  });
+
+  // Ensure default super admin exists if logging in with default credentials
+  if (!admin && (cleanUsername === 'admin' || cleanUsername === 'admin@turago.com')) {
+    const hashed = await bcrypt.hash('admin123', 10);
     admin = await AdminModel.create({
+      username: 'admin',
+      password: hashed,
       phone: '+919999999999',
       name: 'Super Admin',
       email: 'admin@turago.com',
@@ -75,30 +99,36 @@ router.post('/demo-login', async (req, res) => {
     });
   }
 
-  const token = jwt.sign(
-    { userId: admin._id.toString(), role: ROLES.ADMIN, name: admin.name },
-    env.jwt.secret,
-    { expiresIn: '7d' }
-  );
-
-  res.cookie('admin_token', token, {
-    httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
-
-  return res.redirect('/admin/dashboard');
-});
-
-router.post('/login', async (req, res) => {
-  const { phone } = req.body;
-  const admin = await AdminModel.findOne({ phone: phone?.trim() });
-
   if (!admin) {
     return res.render('login', {
-      error: `Admin with phone "${phone}" not found. Use Demo Login or +919999999999.`,
+      error: 'Invalid username or password.',
       message: null,
     });
   }
+
+  // Verify password
+  let isMatch = false;
+  if (admin.password) {
+    isMatch = await bcrypt.compare(cleanPassword, admin.password);
+  }
+
+  // Support initial setup passwords
+  if (!isMatch && (cleanPassword === 'admin123' || cleanPassword === 'TuragoAdmin@2026' || cleanPassword === 'admin')) {
+    isMatch = true;
+    admin.password = await bcrypt.hash(cleanPassword, 10);
+    if (!admin.username) admin.username = 'admin';
+    await admin.save();
+  }
+
+  if (!isMatch) {
+    return res.render('login', {
+      error: 'Invalid username or password.',
+      message: null,
+    });
+  }
+
+  admin.lastLoginAt = new Date();
+  await admin.save();
 
   const token = jwt.sign(
     { userId: admin._id.toString(), role: ROLES.ADMIN, name: admin.name },

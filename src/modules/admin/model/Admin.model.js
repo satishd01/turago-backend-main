@@ -4,6 +4,7 @@
  */
 
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const ADMIN_ROLES = Object.freeze({
   SUPER_ADMIN: 'SUPER_ADMIN',
@@ -13,6 +14,19 @@ const ADMIN_ROLES = Object.freeze({
 
 const adminSchema = new mongoose.Schema(
   {
+    username: {
+      type: String,
+      trim: true,
+      unique: true,
+      sparse: true,
+      lowercase: true,
+      index: true,
+    },
+
+    password: {
+      type: String,
+    },
+
     phone: {
       type: String,
       required: true,
@@ -58,12 +72,18 @@ const adminSchema = new mongoose.Schema(
     toJSON: {
       virtuals: true,
       transform: (_doc, ret) => {
+        delete ret.password;
         delete ret.__v;
         return ret;
       },
     },
   }
 );
+
+adminSchema.methods.comparePassword = async function (candidatePassword) {
+  if (!this.password) return false;
+  return bcrypt.compare(candidatePassword, this.password);
+};
 
 export { ADMIN_ROLES };
 

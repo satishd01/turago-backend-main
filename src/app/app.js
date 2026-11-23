@@ -52,14 +52,8 @@ app.use(
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, Postman, curl)
-      if (!origin) {
-        return callback(null, true);
-      }
-      if (env.cors.origins.includes(origin) || env.cors.origins.includes('*')) {
-        return callback(null, true);
-      }
-      return callback(new Error(`CORS: Origin '${origin}' is not allowed`));
+      // Allow requests with no origin, 'null' (file://, sandboxed redirects, webviews), or any web client
+      return callback(null, true);
     },
     credentials: true,
   })

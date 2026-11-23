@@ -4,6 +4,7 @@
  */
 
 import { connectDatabase } from '../config/database.js';
+import bcrypt from 'bcryptjs';
 import FareConfigModel from '../modules/fares/model/FareConfig.model.js';
 import AdminModel from '../modules/admin/model/Admin.model.js';
 import { VEHICLE_TYPE } from '../common/constants/index.js';
@@ -74,8 +75,11 @@ async function seed() {
   }
   console.log('✓ Fare configs seeded for BIKE, AUTO, CAB, CAR');
 
-  // 2. Seed Admin account
+  // 2. Seed Admin account with Username & Password
+  const hashedPassword = await bcrypt.hash('Admin@turago2026', 10);
   const defaultAdmin = {
+    username: 'admin',
+    password: hashedPassword,
     phone: '+919999999999',
     name: 'Super Admin',
     email: 'admin@turago.com',
@@ -88,7 +92,7 @@ async function seed() {
     { $set: defaultAdmin },
     { upsert: true, new: true }
   );
-  console.log('✓ Super Admin seeded: +919999999999');
+  console.log('✓ Super Admin seeded: username: "admin", password: "Admin@turago2026"');
 
   console.log('Database seeding complete!');
   process.exit(0);
