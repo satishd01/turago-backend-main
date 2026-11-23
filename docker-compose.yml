@@ -1,0 +1,75 @@
+services:
+  # ── Application ─────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: turago-api
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      MONGODB_URI: mongodb://mongo:27017/turago
+      JWT_SECRET: dev_jwt_secret_docker_change_in_production_xxxxx
+      JWT_REFRESH_SECRET: dev_refresh_secret_docker_change_in_production_xxxxx
+      SMS_PROVIDER: mock
+      PAYMENT_PROVIDER: mock
+      MAP_PROVIDER: mock
+      STORAGE_PROVIDER: local
+      PUSH_NOTIFICATION_PROVIDER: mock
+      LOG_LEVEL: debug
+      CORS_ORIGINS: "http://localhost:3000,http://localhost:8080"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - ./uploads:/app/uploads
+    restart: unless-stopped
+    networks:
+      - turago-network
+
+  # ── MongoDB ──────────────────────────────────────────────────────────────────
+  mongo:
+    image: mongo:7.0
+    container_name: turago-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - mongo_config:/data/configdb
+    environment:
+      MONGO_INITDB_DATABASE: turago
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - turago-network
+
+  # ── Mongo Express (DB UI for development) ────────────────────────────────────
+  mongo-express:
+    image: mongo-express:latest
+    container_name: turago-mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: password
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - turago-network
+
+volumes:
+  mongo_data:
+  mongo_config:
+
+networks:
+  turago-network:
+    driver: bridge
