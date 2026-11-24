@@ -32,15 +32,40 @@ export class RideRepository {
    * @param {object} [options]
    * @param {number} [options.limit]
    * @param {number} [options.skip]
+   * @param {string} [options.status]
    * @returns {Promise<import('mongoose').Document[]>}
    */
-  async findByCustomer(customerId, { limit = 20, skip = 0 } = {}) {
-    return RideModel.find({ customerId })
+  async findByCustomer(customerId, { limit = 20, skip = 0, status } = {}) {
+    const query = { customerId };
+    if (status) query.status = status;
+    return RideModel.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .select('-__v')
-      .populate('driverId', 'name phone');
+      .populate('driverId', 'name phone profileImage vehicleType averageRating')
+      .populate('vehicleId', 'type registrationNumber make model color');
+  }
+
+  /**
+   * Finds all rides for a driver.
+   * @param {string} driverId
+   * @param {object} [options]
+   * @param {number} [options.limit]
+   * @param {number} [options.skip]
+   * @param {string} [options.status]
+   * @returns {Promise<import('mongoose').Document[]>}
+   */
+  async findByDriver(driverId, { limit = 20, skip = 0, status } = {}) {
+    const query = { driverId };
+    if (status) query.status = status;
+    return RideModel.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .select('-__v')
+      .populate('customerId', 'name phone profileImage')
+      .populate('vehicleId', 'type registrationNumber make model color');
   }
 
   /**
@@ -102,10 +127,27 @@ export class RideRepository {
   /**
    * Counts rides by customer.
    * @param {string} customerId
+   * @param {object} [options]
+   * @param {string} [options.status]
    * @returns {Promise<number>}
    */
-  async countByCustomer(customerId) {
-    return RideModel.countDocuments({ customerId });
+  async countByCustomer(customerId, { status } = {}) {
+    const query = { customerId };
+    if (status) query.status = status;
+    return RideModel.countDocuments(query);
+  }
+
+  /**
+   * Counts rides by driver.
+   * @param {string} driverId
+   * @param {object} [options]
+   * @param {string} [options.status]
+   * @returns {Promise<number>}
+   */
+  async countByDriver(driverId, { status } = {}) {
+    const query = { driverId };
+    if (status) query.status = status;
+    return RideModel.countDocuments(query);
   }
 }
 

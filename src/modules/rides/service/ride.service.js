@@ -222,6 +222,47 @@ const rideService = {
   },
 
   /**
+   * Returns paginated ride history for either Customer or Driver.
+   * @param {string} userId
+   * @param {string} role
+   * @param {object} [options]
+   * @param {number} [options.page]
+   * @param {number} [options.limit]
+   * @param {string} [options.status]
+   * @returns {Promise<object>}
+   */
+  async getRideHistory(userId, role, { page = 1, limit = 20, status } = {}) {
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
+    const skip = (pageNum - 1) * limitNum;
+
+    let rides;
+    let total;
+
+    if (role === 'DRIVER') {
+      [rides, total] = await Promise.all([
+        rideRepository.findByDriver(userId, { limit: limitNum, skip, status }),
+        rideRepository.countByDriver(userId, { status }),
+      ]);
+    } else {
+      [rides, total] = await Promise.all([
+        rideRepository.findByCustomer(userId, { limit: limitNum, skip, status }),
+        rideRepository.countByCustomer(userId, { status }),
+      ]);
+    }
+
+    return {
+      rides,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    };
+  },
+
+  /**
    * Returns the live state of a ride (for customer polling).
    * Includes driver's current location if assigned.
    * @param {string} rideId
